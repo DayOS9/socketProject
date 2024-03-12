@@ -8,12 +8,12 @@ import random
 import pickle
 
 PORT = 26751 #specifying the port number in my given range
-#SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
-SERVER = "192.168.1.3"
+SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
+#SERVER = "192.168.1.3"
 ADDR = (SERVER, PORT) #what we pass in to bind when binding socket
 FORMAT = 'utf-8'
 
-server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)#creating the socket
+server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)#creating the socket
 server.bind(ADDR)#we are binding the socket to the ip adress and port we specified
 
 #dictionary of lists to store the registered users
