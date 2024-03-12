@@ -8,8 +8,7 @@ import random
 import pickle
 
 PORT = 26751 #specifying the port number in my given range
-SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
-#SERVER = "192.168.1.3"
+SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on #SERVER = "192.168.1.3"
 ADDR = (SERVER, PORT) #what we pass in to bind when binding socket
 FORMAT = 'utf-8'
 
