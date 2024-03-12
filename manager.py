@@ -75,27 +75,24 @@ def dhtComplete(name):
     pass
 
 def handle(message, addr):
+    errorString = "Error, invalid command"
     print(f"This person -> {addr} has connected")
     print(f"They said -> {message}")
     print()
 
     message = message.decode(FORMAT)
-    connected = True
-    while connected:
-        if(message.split(' ')[0] == "register"):
-            temp = message.split(' ')
-            register(temp[1], temp[2], temp[3], temp[4], addr)#this is passing in the name, address, and two ports
-            message = ""
-        elif(message.split(' ')[0] == "setup-dht"):
-            temp = message.split(' ')
-            setdht(temp[1], temp[2], temp[3], addr)
-            message = ""
-        elif(message.split(' ')[0] == "dht-complete"):
-            temp = message.split(' ')
-            dhtComplete(temp[1])
-            message = ""
-        else:
-            continue
+    if(message.split(' ')[0] == "register"):
+        temp = message.split(' ')
+        register(temp[1], temp[2], temp[3], temp[4], addr)#this is passing in the name, address, and two ports
+    elif(message.split(' ')[0] == "setup-dht"):
+        temp = message.split(' ')
+        setdht(temp[1], temp[2], temp[3], addr)
+    elif(message.split(' ')[0] == "dht-complete"):
+        temp = message.split(' ')
+        dhtComplete(temp[1])
+    else:
+        errorString.encode(FORMAT)
+        server.sendto(msg, addr)
 
 def start():
     while True:
