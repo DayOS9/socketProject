@@ -54,7 +54,7 @@ def setdht(name, n, year, addr):
     registrees[name][3] = "Leader"#set the person who initiated construction to be the leader
     #list to store the users chosen, the first user is always the leader
     lister = []
-    lister.append([name, registrees[name][0], registrees[name][2]])
+    lister.append((name, registrees[name][0], registrees[name][2]))
     #pick n-1 free users from the list(dictionary)
     for i in range(int(n) - 1):
         hi = list(registrees.keys())
@@ -62,14 +62,14 @@ def setdht(name, n, year, addr):
         while(registrees[tmp][3] == "Leader" or registrees[tmp][3] == "inDHT"):
             tmp = random.choice(hi)
         registrees[tmp][3] = "inDHT"
-        lister.append([tmp, registrees[tmp][0], registrees[tmp][2]])
+        lister.append((tmp, registrees[tmp][0], registrees[tmp][2]))
     #store the exacts ones that were changed into a list of sublists so that it can be passed to the client
     #tell client it was successful before sending list
     server.sendto(b"SUCCESS", addr)
     started = True
-    msg = str(lister)
-    msg = msg.encode(FORMAT)
-    #msg = pickle.dumps(lister)
+    #msg = str(lister)
+    #msg = msg.encode(FORMAT)
+    msg = pickle.dumps(lister)
     server.sendto(msg, addr)
             
 #a function to check if the peer has done all the necessary steps for setting up the dht
