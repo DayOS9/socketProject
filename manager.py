@@ -8,7 +8,8 @@ import random
 import pickle
 
 PORT = 26751 #specifying the port number in my given range
-SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on #SERVER = "192.168.1.3"
+#SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
+SERVER = "192.168.1.3"
 ADDR = (SERVER, PORT) #what we pass in to bind when binding socket
 FORMAT = 'utf-8'
 
@@ -35,6 +36,7 @@ def register(name, ipv4, mport, nport, addr):
     #if none matches, then we can add to the dictionary
     registrees[name] = [ipv4, mport, nport, "Free"]#when adding a person, their state is free
     server.sendto(b"SUCCESS", addr)
+
 #when a user decides to create the dht/initialize
 def setdht(name, n, year, addr):
     if name not in registrees.keys():
@@ -77,7 +79,7 @@ def dhtComplete(name):
 def handle(message, addr):
     errorString = "Error, invalid command"
     print(f"This person -> {addr} has connected")
-    print(f"They said -> {message}")
+    print(f"They said -> {message.decode(FORMAT)}")
     print()
 
     message = message.decode(FORMAT)
@@ -96,7 +98,7 @@ def handle(message, addr):
 
 def start():
     while True:
-        conObj, addr = server.recvfrom(1024) #when accepting new connection, will obtain its address/port along with object
+        message, addr = server.recvfrom(1024) #when accepting new connection, will obtain its address/port along with object
         thread = threading.Thread(target=handle, args=(conObj, addr))
         thread.start()
 
