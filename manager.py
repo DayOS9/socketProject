@@ -93,13 +93,12 @@ def handle(message, addr):
         temp = message.split(' ')
         dhtComplete(temp[1])
     else:
-        errorString.encode(FORMAT)
-        server.sendto(msg, addr)
+        server.sendto(errorString.encode(FORMAT), addr)
 
 def start():
     while True:
-        message, addr = server.recvfrom(1024) #when accepting new connection, will obtain its address/port along with object
-        thread = threading.Thread(target=handle, args=(conObj, addr))
+        message, addr = server.recvfrom(65535) #when accepting new connection, will obtain its address/port along with object
+        thread = threading.Thread(target=handle, args=(message, addr))
         thread.start()
 
 print("The server has started and is running...")
