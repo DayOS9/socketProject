@@ -2,15 +2,19 @@ import socket
 import pickle
 import threading
 
-server = "192.168.1.3"
-port = 26751
+sport = 26751
 forma = 'utf-8'
-#serverP = "192.168.1.6"
-serverP = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
-port1 = 26752
+#ipaddr = "192.168.1.6"
+ipaddr = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
+pport = 26752
 
+#socket where it will listen only for the server
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-client.bind((serverP, port1))
+client.bind((ipaddr, sport))
+
+#socket where it will only listen to the peer
+peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+peer.bind((ipaddr, pport))
 
 #client.sendto(b"register dave 127.0.0.2 5 6", (server, port))
 #client.sendto(b"register joe 127.0.0.2 7 8", (server, port))
@@ -24,11 +28,11 @@ def handle():
     option = input("1 -> Register | 2 -> setupdht\n")
     if(option == "1"):
         user = input("Please enter command: ")
-        client.sendto(user.encode(forma), (server, port))
+        client.sendto(user.encode(forma), (server, sport))
         return 1
     elif(option == "2"):
         user = input("Please enter command: ")
-        client.sendto(user.encode(forma), (server, port))
+        client.sendto(user.encode(forma), (server, sport))
         return 2
     else:
         print("Not a valid command")

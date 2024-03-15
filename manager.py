@@ -83,23 +83,29 @@ def handle(message, addr):
     print()
 
     message = message.decode(FORMAT)
-    if(message.split(' ')[0] == "register"):
-        temp = message.split(' ')
-        register(temp[1], temp[2], temp[3], temp[4], addr)#this is passing in the name, address, and two ports
-    elif(message.split(' ')[0] == "setup-dht"):
-        temp = message.split(' ')
-        setdht(temp[1], temp[2], temp[3], addr)
-    elif(message.split(' ')[0] == "dht-complete"):
-        temp = message.split(' ')
-        dhtComplete(temp[1])
-    else:
-        server.sendto(errorString.encode(FORMAT), addr)
+    try:
+        if(message.split(' ')[0] == "register"):
+            temp = message.split(' ')
+            register(temp[1], temp[2], temp[3], temp[4], addr)#this is passing in the name, address, and two ports
+        elif(message.split(' ')[0] == "setup-dht"):
+            temp = message.split(' ')
+            setdht(temp[1], temp[2], temp[3], addr)
+        elif(message.split(' ')[0] == "dht-complete"):
+            temp = message.split(' ')
+            dhtComplete(temp[1])
+        else:
+            server.sendto(errorString.encode(FORMAT), addr)
+    except IndexError:
+        server.sendto(b"Insufficient amount of arguments", addr)
 
 def start():
     while True:
         message, addr = server.recvfrom(65535) #when accepting new connection, will obtain its address/port along with object
-        thread = threading.Thread(target=handle, args=(message, addr))
-        thread.start()
+        if started is False:
+            thread = threading.Thread(target=handle, args=(message, addr))
+            thread.start()
+        else:
+            server.sendto(b"FAILURE", addr)
 
 print("The server has started and is running...")
 print(SERVER)
