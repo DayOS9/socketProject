@@ -44,7 +44,7 @@ def finishdht(users):
     rightNeighbor = users[1] #leader will always get the next person in line
     identifier = 0 #leader will always have identifier as 0
     #now loop starting past the leader and will send info to other peers
-    for i in range(1, len(users) - 1):
+    for i in range(1, len(users)):
         lister = [i, len(users), users]
         peer.sendto(b"set-id", (users[i][1], int(users[i][2])))
         peer.sendto(pickle.dumps(lister), (users[i][1], int(users[i][2])))
@@ -68,9 +68,9 @@ def start():
     #create a thread which will be checking in the background whether they have received
     #a message from a peer
     thread = threading.Thread(target=peers)
+    thread.start()
     while True:
-        if(rightNeighbour not None):
-            print(rightNeighbour)
+        print(rightNeighbour)
         option = handle()
         if(option == 2):
             message, addr = client.recvfrom(65535)
