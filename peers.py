@@ -13,9 +13,13 @@ ipaddr = socket.gethostbyname(socket.gethostname())#this will dynamically obtain
 pport = 26752
 
 #information about our neighbor
+global rightNeighbour
 rightNeighbour = None #this will be a size three tuple
+global identifier
 identifier = None
+global ringSize
 ringSize = None
+global year
 year = None
 
 #socket where it will listen only for the server
@@ -27,6 +31,7 @@ peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 peer.bind((ipaddr, pport))
 
 #hash table of weather records
+global records
 records = {}
 
 #client.sendto(b"register dave 127.0.0.2 5 6", (server, port))
@@ -67,23 +72,33 @@ def idfind(length, event_id):
     return idd
 
 def peers():
+    global identifier
+    global ringSize
+    global rightNeighbour
     #loop to always check if there is a message from another peer
     while True:
         message, addr = peer.recvfrom(65535)
         if(message.decode(forma) == "set-id"):
             message, addr = peer.recvfrom(65535)
             info = pickle.loads(message)
-            identifier = info[0];
-            ringSize = info[1];
+            identifier = int(info[0])
+            ringSize = int(info[1])
             #perform calc to get right neighbor
             temp = (identifier + 1) % ringSize
             rightNeighbour = info[2][temp]
-        if(message.decode(forma) == "store"):
+        elif(message.decode(forma) == "store"):
             print("We got a store command!")
+        else:
+            continue
 
 def finishdht(users, year):
+    global records
+    global ringSize
+    global rightNeighbour
+    global identifier
     rightNeighbor = users[1] #leader will always get the next person in line
     identifier = 0 #leader will always have identifier as 0
+    ringSize = len(users)
     #now loop starting past the leader and will send info to other peers
     for i in range(1, len(users)):
         lister = [i, len(users), users]
@@ -102,12 +117,13 @@ def finishdht(users, year):
             if(idd == identifier):
                 records[hash(' '.join(record))] = record
             else:#if not leader, send to right neighbour to have it forwarded
-                peer.sendto(b"store", (rightNeighbour[1], rightNeighbour[2]))
-                peer.sendto(b"{idd}", (rightNeighbour[1], rightNeighbour[2]))
-                peer.sendto(pickle.dumps(record), (rightNeightbour[1], rightNeighbour[2])) 
+                peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(b"{idd}", (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(pickle.dumps(record), (rightNeightbour[1], int(rightNeighbour[2]))) 
 
 
 def handle():
+    global year
     option = input("1 -> Register | 2 -> setupdht\n")
     if(option == "1"):
         user = input("Please enter command: ")
@@ -124,6 +140,7 @@ def handle():
 
 
 def start():
+    global year
     #create a thread which will be checking in the background whether they have received
     #a message from a peer
     thread = threading.Thread(target=peers)
