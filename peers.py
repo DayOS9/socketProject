@@ -97,7 +97,7 @@ def finishdht(users, year):
         csvreader = csv.reader(file)
         #now iterate record by record
         for record in csvreader:
-            idd = idfind(length, record[0]) #get hashed id to see which peer it belongs to
+            idd = idfind(length - 1, int(record[0])) #get hashed id to see which peer it belongs to
             #check if it is leader's own id
             if(idd == identifier):
                 records[hash(' '.join(record))] = record
