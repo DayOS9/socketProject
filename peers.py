@@ -3,7 +3,6 @@ import pickle
 import threading
 import csv
 import math
-import pandas as pd
 
 serveraddr = "192.168.1.3"
 sport = 26751
@@ -75,6 +74,7 @@ def peers():
     global identifier
     global ringSize
     global rightNeighbour
+    global records
     #loop to always check if there is a message from another peer
     while True:
         message, addr = peer.recvfrom(65535)
@@ -87,7 +87,19 @@ def peers():
             temp = (identifier + 1) % ringSize
             rightNeighbour = info[2][temp]
         elif(message.decode(forma) == "store"):
-            print("We got a store command!")
+            message, addr = peer.recvfrom(65535) #this is the id
+            idd = message.decode(forma)
+            idd = int(idd)
+            if(idd == identifier):
+                message, addr = peer.recvfrom(65535)
+                out = pickle.loads(message)
+                records[hash(' '.join(out))] = out
+            else:
+                message, addr = peer.recvfrom(65535)
+                out = pickle.loads(message)
+                peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(pickle.dumps(out), (rightNeighbour[1], int(rightNeighbour[2])))
         else:
             continue
 
@@ -104,12 +116,17 @@ def finishdht(users, year):
         lister = [i, len(users), users]
         peer.sendto(b"set-id", (users[i][1], int(users[i][2])))
         peer.sendto(pickle.dumps(lister), (users[i][1], int(users[i][2])))
+
     #now count lines in the details-{year}.csv file
-    length = len(results = pd.read_csv(f"details-{year}.csv"))
+    length = 0
+    with open(f"details-{year}.csv") as file:
+        length = sum(1 for line in file)
+
     #now read csv file line by line (each record) and send to appropriate peer
     with open(f"details-{year}.csv") as file:
         header = next(file) #skip header
         csvreader = csv.reader(file)
+
         #now iterate record by record
         for record in csvreader:
             idd = idfind(length - 1, int(record[0])) #get hashed id to see which peer it belongs to
@@ -118,7 +135,7 @@ def finishdht(users, year):
                 records[hash(' '.join(record))] = record
             else:#if not leader, send to right neighbour to have it forwarded
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
-                peer.sendto(b"{idd}", (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(pickle.dumps(record), (rightNeightbour[1], int(rightNeighbour[2]))) 
 
 
@@ -146,7 +163,6 @@ def start():
     thread = threading.Thread(target=peers)
     thread.start()
     while True:
-        print(rightNeighbour)
         option = handle()
         if(option == 2):
             message, addr = client.recvfrom(65535)
