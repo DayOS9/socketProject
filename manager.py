@@ -19,7 +19,6 @@ server.bind(ADDR)#we are binding the socket to the ip adress and port we specifi
 #dictionary of lists to store the registered users
 registrees = {}
 dhtMade = False #global var to keep track if a dht was already made
-finished = False #global var to keep track if dht was set up completely
 started = False#check if dht setup inititiated
 
 #register command when new connection/user is made
@@ -39,6 +38,7 @@ def register(name, ipv4, mport, nport, addr):
 
 #when a user decides to create the dht/initialize
 def setdht(name, n, year, addr):
+    global started
     if name not in registrees.keys():
         server.sendto(b"FAILURE", addr)
         return
@@ -73,8 +73,14 @@ def setdht(name, n, year, addr):
     server.sendto(msg, addr)
             
 #a function to check if the peer has done all the necessary steps for setting up the dht
-def dhtComplete(name):
-    pass
+def dhtComplete(name, addr):
+    global started
+    global dhtMade
+    if(registrees[name][3] != "Leader"):
+        server.sendto(b"FAILURE", addr)
+    else:
+        started = False
+        dhtMade = True
 
 def handle(message, addr):
     errorString = "Error, invalid command"
@@ -92,7 +98,7 @@ def handle(message, addr):
             setdht(temp[1], temp[2], temp[3], addr)
         elif(message.split(' ')[0] == "dht-complete"):
             temp = message.split(' ')
-            dhtComplete(temp[1])
+            dhtComplete(temp[1], addr) #name
         else:
             server.sendto(errorString.encode(FORMAT), addr)
     except IndexError:

@@ -20,6 +20,7 @@ global ringSize
 ringSize = None
 global year
 year = None
+dhtMade = False
 
 #socket where it will listen only for the server
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,10 +34,12 @@ peer.bind((ipaddr, pport))
 global records
 records = {}
 
-#client.sendto(b"register dave 127.0.0.2 5 6", (server, port))
-#client.sendto(b"register joe 127.0.0.2 7 8", (server, port))
-#client.sendto(b"register bob 127.0.0.2 9 10", (server, port))
-#client.sendto(b"setup-dht bob 3 2021", (server, port))
+def dhtComp(name):
+    if(dhtMade):
+        msg = f"dht-complete {name}"
+        client.sendto(msg.encode(forma), (serveraddr, sport))
+    else:
+        print("dht is not complete")
 
 def isPrime(n):
     if(n <= 1):
@@ -108,6 +111,7 @@ def finishdht(users, year):
     global ringSize
     global rightNeighbour
     global identifier
+    global dhtMade
     rightNeighbor = users[1] #leader will always get the next person in line
     identifier = 0 #leader will always have identifier as 0
     ringSize = len(users)
@@ -137,11 +141,11 @@ def finishdht(users, year):
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(pickle.dumps(record), (rightNeightbour[1], int(rightNeighbour[2]))) 
-
+    dhtMade = True
 
 def handle():
     global year
-    option = input("1 -> Register | 2 -> setupdht\n")
+    option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete\n")
     if(option == "1"):
         user = input("Please enter command: ")
         client.sendto(user.encode(forma), (serveraddr, sport))
@@ -151,6 +155,10 @@ def handle():
         year = user.split(' ')[-1] #year input by user
         client.sendto(user.encode(forma), (serveraddr, sport))
         return 2
+    elif(option == "3"):
+        user = input("Please enter command: ")
+        name = user.split(' ')[-1]
+        dhtComp(name)
     else:
         print("Not a valid command")
         return 0
