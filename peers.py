@@ -107,6 +107,9 @@ def peers():
             continue
 
 def finishdht(users, year):
+    #this is to count how many records each node has received
+    printer = dict.fromkeys(range(0, len(users)))
+    printer = {key: 0 for key in printer}
     global records
     global ringSize
     global rightNeighbour
@@ -134,6 +137,7 @@ def finishdht(users, year):
         #now iterate record by record
         for record in csvreader:
             idd = idfind(length - 1, int(record[0])) #get hashed id to see which peer it belongs to
+            printer[idd] = printer[idd] + 1
             #check if it is leader's own id
             if(idd == identifier):
                 records[hash(' '.join(record))] = record
@@ -142,6 +146,7 @@ def finishdht(users, year):
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(pickle.dumps(record), (rightNeightbour[1], int(rightNeighbour[2]))) 
     dhtMade = True
+    print(printer)
 
 def handle():
     global year
