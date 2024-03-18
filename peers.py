@@ -34,13 +34,6 @@ peer.bind((ipaddr, pport))
 global records
 records = {}
 
-def dhtComp(name):
-    if(dhtMade):
-        msg = f"dht-complete {name}"
-        client.sendto(msg.encode(forma), (serveraddr, sport))
-    else:
-        print("dht is not complete")
-
 def isPrime(n):
     if(n <= 1):
         return False
@@ -151,7 +144,7 @@ def finishdht(users, year):
 
 def handle():
     global year
-    option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete\n")
+    option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete | 4 -> query-dht\n")
     if(option == "1"):
         user = input("Please enter command: ")
         client.sendto(user.encode(forma), (serveraddr, sport))
@@ -163,8 +156,12 @@ def handle():
         return 2
     elif(option == "3"):
         user = input("Please enter command: ")
-        name = user.split(' ')[-1]
-        dhtComp(name)
+        client.sendto(user.encode(forma), (serveraddr, sport))
+        return 3
+    elif(option == "4"):
+        user = input("Please enter command: ")
+        client.sendto(user.encode(forma), (serveraddr, sport))
+        return 4
     else:
         print("Not a valid command")
         return 0

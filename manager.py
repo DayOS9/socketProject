@@ -76,7 +76,7 @@ def setdht(name, n, year, addr):
 def dhtComplete(name, addr):
     global started
     global dhtMade
-    if(registrees[name][3] != "Leader"):
+    if(registrees[name][3] != "Leader" or started == False):
         server.sendto(b"FAILURE", addr)
     else:
         started = False
