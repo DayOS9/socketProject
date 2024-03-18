@@ -81,6 +81,8 @@ def dhtComplete(name, addr):
     else:
         started = False
         dhtMade = True
+def queryDht(name):
+    pass 
 
 def handle(message, addr):
     errorString = "Error, invalid command"
@@ -99,6 +101,9 @@ def handle(message, addr):
         elif(message.split(' ')[0] == "dht-complete"):
             temp = message.split(' ')
             dhtComplete(temp[1], addr) #name
+        elif(message.split(' ')[0] == "query-dht"):
+            temp = message.split(' ')[1]
+            queryDht(temp)
         else:
             server.sendto(errorString.encode(FORMAT), addr)
     except IndexError:

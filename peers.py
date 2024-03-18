@@ -67,6 +67,7 @@ def findPrime(n):
     return prime
 
 def idfind(length, event_id):
+    global records
     #for size find frist prime number larger than 2 * length
     size = findPrime(length * 2)
     pos = event_id % size
@@ -96,7 +97,7 @@ def peers():
             if(idd == identifier):
                 message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
-                records[hash(' '.join(out))] = out
+                records[int(record[0]) % (findPrime((length - 1) * 2))] = out
             else:
                 message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
@@ -140,7 +141,7 @@ def finishdht(users, year):
             printer[idd] = printer[idd] + 1
             #check if it is leader's own id
             if(idd == identifier):
-                records[hash(' '.join(record))] = record
+                records[int(record[0]) % (findPrime((length - 1) * 2))] = record
             else:#if not leader, send to right neighbour to have it forwarded
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
