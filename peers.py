@@ -148,6 +148,15 @@ def finishdht(users, year):
     dhtMade = True
     print(printer)
 
+
+def findEvent(peer):
+    eventid = input("What is the event-id you want to look for?: ")
+    peer.sendto(b"find-event", (peer[1], peer[2]))
+    peer.sendto(eventid.encode(forma), (peer[1], peer[2]))
+    #send three tuple so that when found or not, message is routed to me
+    lister = () #figure out how to get name
+    peer.sendto(pickle.dumps(lister), (peer[1], peer[2]))
+
 def handle():
     global year
     option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete | 4 -> query-dht\n")
@@ -195,7 +204,8 @@ def start():
             message, addr = client.recvfrom(65535)
             print(message.decode(forma))
             message, addr = client.recvfrom(65535)
-            peer = (pickle.loads(message))[0]
+            peer = pickle.loads(message)
+            findEvent(peer)
                 
         else:
             message, addr = client.recvfrom(65535) #response I get from server

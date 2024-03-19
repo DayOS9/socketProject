@@ -9,7 +9,7 @@ import pickle
 
 PORT = 26751 #specifying the port number in my given range
 #SERVER = socket.gethostbyname(socket.gethostname())#this will dynamically obtain the ip adress of the machine this is running on 
-SERVER = "192.168.1.3"
+SERVER = "10.159.53.205"
 ADDR = (SERVER, PORT) #what we pass in to bind when binding socket
 FORMAT = 'utf-8'
 
@@ -99,8 +99,7 @@ def queryDht(name, addr):
     tmp = random.choice(hi)
     while(registrees[name][3] == "Free"):
         tmp = random.choice(hi)
-    lister = []
-    lister.append((tmp, registrees[tmp][0], registrees[tmp][2]))
+    lister = (tmp, registrees[tmp][0], registrees[tmp][2])
     server.sendto(b"SUCCESS", addr)
     server.sendto(pickle.dumps(lister), addr)
 
