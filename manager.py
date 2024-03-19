@@ -23,6 +23,7 @@ started = False#check if dht setup inititiated
 
 #register command when new connection/user is made
 def register(name, ipv4, mport, nport, addr):
+    global registrees
     #lets first check user already exits by name
     if name in registrees.keys():
         server.sendto(b"FAILURE", addr)
@@ -38,6 +39,7 @@ def register(name, ipv4, mport, nport, addr):
 
 #when a user decides to create the dht/initialize
 def setdht(name, n, year, addr):
+    global registrees
     global started
     if name not in registrees.keys():
         server.sendto(b"FAILURE", addr)
@@ -81,8 +83,27 @@ def dhtComplete(name, addr):
     else:
         started = False
         dhtMade = True
-def queryDht(name):
-    pass 
+        server.sendto(b"SUCCESS", addr)
+
+def queryDht(name, addr):
+    global registrees
+    #check if the dht is made
+    if(dhtMade == False):
+        server.sendto(b"FAILURE", addr)
+    if name not in registrees.keys():
+        server.sendto(b"FAILURE", addr)
+    if(registrees[name][3] != "Free"):
+        server.sendto(b"FAILURE", addr)
+    #return a random size 3 tuple of a peer in the dht
+    names = list(registrees.keys())
+    tmp = random.choice(hi)
+    while(registrees[name][3] == "Free"):
+        tmp = random.choice(hi)
+    lister = []
+    lister.append((tmp, registrees[tmp][0], registrees[tmp][2]))
+    server.sendto(b"SUCCESS", addr)
+    server.sendto(pickle.dumps(lister), addr)
+
 
 def handle(message, addr):
     errorString = "Error, invalid command"
@@ -103,7 +124,7 @@ def handle(message, addr):
             dhtComplete(temp[1], addr) #name
         elif(message.split(' ')[0] == "query-dht"):
             temp = message.split(' ')[1]
-            queryDht(temp)
+            queryDht(temp, addr)
         else:
             server.sendto(errorString.encode(FORMAT), addr)
     except IndexError:
