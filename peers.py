@@ -89,13 +89,18 @@ def peers():
             idd = int(idd)
             if(idd == identifier):
                 message, addr = peer.recvfrom(65535)
+                length = int(message.decode(forma))
+                message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
-                records[int(record[0]) % (findPrime((length - 1) * 2))] = out
+                records[int(out[0]) % (findPrime((length) * 2))] = out
             else:
+                message, addr = peer.recvfrom(65535)
+                length = int(message.decode(forma))
                 message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(str(length).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(pickle.dumps(out), (rightNeighbour[1], int(rightNeighbour[2])))
         else:
             continue
@@ -138,7 +143,8 @@ def finishdht(users, year):
             else:#if not leader, send to right neighbour to have it forwarded
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
-                peer.sendto(pickle.dumps(record), (rightNeightbour[1], int(rightNeighbour[2]))) 
+                peer.sendto(str(length - 1).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
+                peer.sendto(pickle.dumps(record), (rightNeighbour[1], int(rightNeighbour[2]))) 
     dhtMade = True
     print(printer)
 
@@ -185,6 +191,11 @@ def start():
             else:
                 year = None #meaning there was an error so remove previous entry
                 print(message.decode(forma))
+        elif(option == 4):
+            message, addr = client.recvfrom(65535)
+            print(message.decode(forma))
+            message, addr = client.recvfrom(65535)
+            peer = (pickle.loads(message))[0]
                 
         else:
             message, addr = client.recvfrom(65535) #response I get from server
