@@ -47,7 +47,7 @@ def isPrime(n):
         if(n % i == 0 or n % (i + 2) == 0):
             return False
     return True
-
+#both of these functions ^ \/ serve as a way to obtain next closest prime number for id and pos
 def findPrime(n):
     if(n <= 1):
         return 2
@@ -69,6 +69,7 @@ def idfind(length, event_id):
     idd = pos % ringSize
     return idd
 
+#function that handles all peer requestions through the peer port
 def peers():
     global identifier
     global ringSize
@@ -77,6 +78,7 @@ def peers():
     global lengther
     #loop to always check if there is a message from another peer
     while True:
+        #check to see what commands were received by other peeres
         message, addr = peer.recvfrom(65535)
         if(message.decode(forma) == "set-id"):
             message, addr = peer.recvfrom(65535)
@@ -91,6 +93,7 @@ def peers():
             idd = message.decode(forma)
             idd = int(idd)
             if(idd == identifier):
+                #if it matches our id, then we can store the event in our hash table
                 message, addr = peer.recvfrom(65535)
                 length = int(message.decode(forma))
                 lengther = length
@@ -98,6 +101,7 @@ def peers():
                 out = pickle.loads(message)
                 records[int(out[0]) % (findPrime((length) * 2))] = out
             else:
+                #otherwise we send it out to our right neighbour to check instead
                 message, addr = peer.recvfrom(65535)
                 length = int(message.decode(forma))
                 lengther = length
@@ -115,7 +119,7 @@ def peers():
             message, addr = peer.recfrom(65535) #this is the id_seq
             #now find pos for hash table location and id to see if it pertains to me
             pos = eventid % (findPrime(lengther * 2))
-            ider = findid(lengther, eventid))
+            ider = findid(lengther, eventid)
             id_seq = ""
             id_seq = id_seq + message.decode(forma)
             id_seq = id_seq + str(ider)
@@ -138,7 +142,7 @@ def peers():
                 #send three tuple so that when found or not, message is routed to me
                 lister = (namer, ipaddr, pport) #send credentials so that when found or not, send back
                 peer.sendto(pickle.dumps(lister), (rightNeighbour[1], rightNeighbour[2]))
-                peer.sendto(id_seq.encode(forma), (peer[1], (rightNeighbour[1], rightNeighbour[2]))
+                peer.sendto(id_seq.encode(forma), (peer[1], (rightNeighbour[1], rightNeighbour[2])))
         else:
             continue
 
@@ -197,7 +201,7 @@ def findEvent(peer):
 
 def handle():
     global year
-    option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete | 4 -> query-dht\n")
+    option = input("1 -> Register | 2 -> setupdht | 3 -> dht-complete | 4 -> query-dht | 5 -> leave-dht | 6 -> join-dht | 7 -> dht-rebuilt | 8 -> deregister | 9 -> teardown-dht | 10 -> teardown-complete\n")
     if(option == "1"):
         user = input("Please enter command: ")
         client.sendto(user.encode(forma), (serveraddr, sport))
@@ -216,6 +220,18 @@ def handle():
         name = user.split(' ')[-1] #get name
         client.sendto(user.encode(forma), (serveraddr, sport))
         return 4
+    elif(option == "5"):
+        client.sendto(b"leave-dht", (serveraddr, sport))
+    elif(option == "6"):
+        client.sendto(b"join-dht", (serveraddr, sport))
+    elif(option == "7"):
+        client.sendto(b"dht-rebuilt", (serveraddr, sport))
+    elif(option == "8"):
+        client.sendto(b"deregister", (serveraddr, sport))
+    elif(option == "9"):
+        client.sendto(b"teardown-dht", (serveraddr, sport))
+    elif(option == "10"):
+        client.sendto(b"teardown-complete", (serveraddr, sport))
     else:
         print("Not a valid command")
         return 0
