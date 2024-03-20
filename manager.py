@@ -104,7 +104,7 @@ def queryDht(name, addr):
     server.sendto(pickle.dumps(lister), addr)
 
 
-def handle(message, addr):
+def handle(message, addr): #this function handles all requests sent by the peers connecting to it
     errorString = "Error, invalid command"
     print(f"This person -> {addr} has connected")
     print(f"They said -> {message.decode(FORMAT)}")
@@ -124,6 +124,18 @@ def handle(message, addr):
         elif(message.split(' ')[0] == "query-dht"):
             temp = message.split(' ')[1]
             queryDht(temp, addr)
+        elif(message == "leave-dht"):
+            server.sendto(b"SUCCESS", addr)
+        elif(message == "join-dht"):
+            server.sendto(b"SUCCESS", addr)
+        elif(message == "dht-rebuilt"):
+            server.sendto(b"SUCCESS", addr)
+        elif(message == "deregister"):
+            server.sendto(b"SUCCESS", addr)
+        elif(message == "teardown-dht"):
+            server.sendto(b"SUCCESS", addr)
+        elif(message == "teardown-complete"):
+            server.sendto(b"SUCCESS", addr)
         else:
             server.sendto(errorString.encode(FORMAT), addr)
     except IndexError:
