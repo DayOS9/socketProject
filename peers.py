@@ -21,6 +21,8 @@ ringSize = None
 global year
 year = None
 dhtMade = False
+namer = None #will keep track what the name of the 
+lengther = None
 
 #socket where it will listen only for the server
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -72,6 +74,7 @@ def peers():
     global ringSize
     global rightNeighbour
     global records
+    global lengther
     #loop to always check if there is a message from another peer
     while True:
         message, addr = peer.recvfrom(65535)
@@ -90,18 +93,52 @@ def peers():
             if(idd == identifier):
                 message, addr = peer.recvfrom(65535)
                 length = int(message.decode(forma))
+                lengther = length
                 message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
                 records[int(out[0]) % (findPrime((length) * 2))] = out
             else:
                 message, addr = peer.recvfrom(65535)
                 length = int(message.decode(forma))
+                lengther = length
                 message, addr = peer.recvfrom(65535)
                 out = pickle.loads(message)
                 peer.sendto(b"store", (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(idd).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(str(length).encode(forma), (rightNeighbour[1], int(rightNeighbour[2])))
                 peer.sendto(pickle.dumps(out), (rightNeighbour[1], int(rightNeighbour[2])))
+        elif(message.decode(forma) == "find-event"):
+            message, addr = peer.recvfrom(65535)
+            eventid = int(message.decode(forma))
+            message, addr = peer.recvfrom(65535)
+            tupler = pickle.loads(message)
+            message, addr = peer.recfrom(65535) #this is the id_seq
+            #now find pos for hash table location and id to see if it pertains to me
+            pos = eventid % (findPrime(lengther * 2))
+            ider = findid(lengther, eventid))
+            id_seq = ""
+            id_seq = id_seq + message.decode(forma)
+            id_seq = id_seq + str(ider)
+            if(identifier == ider):
+                if pos in records:
+                    peer.sendto(b"SUCCESS", (tupler[1], tupler[2]))
+                    peer.sendto(picke.dumps(records[pos]), (tupler[1], tupler[2])) #this is the record found
+                    peer.sendto(id_seq.encode(forma), (tupler[1], tupler[2])) #this is id_seq
+                else:
+                    peer.sendto(b"FAILURE", (tupler[1], tupler[2])) #send error message too below this statement?
+                    peer.sendto(b"The storm event " + eventid + " not found in the DHT", (tupler[1], tupler[2]))
+            else:
+                #make range of numbers excluding the number ider that was produced
+                i = list(range(0, ringSize))
+                i.remove(ider)
+                nexter = random(i)
+                id_seq = id_seq + str(nexter)
+                peer.sendto(b"find-event", (rightNeighbour[1], rightNeighbour[2]))
+                peer.sendto(eventid.encode(forma), (rightNeighbour[1], rightNeighbour[2]))
+                #send three tuple so that when found or not, message is routed to me
+                lister = (namer, ipaddr, pport) #send credentials so that when found or not, send back
+                peer.sendto(pickle.dumps(lister), (rightNeighbour[1], rightNeighbour[2]))
+                peer.sendto(id_seq.encode(forma), (peer[1], (rightNeighbour[1], rightNeighbour[2]))
         else:
             continue
 
@@ -154,8 +191,9 @@ def findEvent(peer):
     peer.sendto(b"find-event", (peer[1], peer[2]))
     peer.sendto(eventid.encode(forma), (peer[1], peer[2]))
     #send three tuple so that when found or not, message is routed to me
-    lister = () #figure out how to get name
+    lister = (namer, ipaddr, pport) #send credentials so that when found or not, send back
     peer.sendto(pickle.dumps(lister), (peer[1], peer[2]))
+    peer.sendto(b"", (peer[1], peer[2]))
 
 def handle():
     global year
@@ -175,6 +213,7 @@ def handle():
         return 3
     elif(option == "4"):
         user = input("Please enter command: ")
+        name = user.split(' ')[-1] #get name
         client.sendto(user.encode(forma), (serveraddr, sport))
         return 4
     else:
