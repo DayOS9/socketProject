@@ -101,7 +101,6 @@ def peers():
                 out = pickle.loads(message)
                 records[int(out[0]) % (findPrime((length) * 2))] = out
             else:
-                #otherwise we send it out to our right neighbour to check instead
                 message, addr = peer.recvfrom(65535)
                 length = int(message.decode(forma))
                 lengther = length
